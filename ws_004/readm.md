@@ -1,0 +1,1 @@
+https://lgphone.tistory.com/122
