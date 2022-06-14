@@ -77,16 +77,16 @@
     <None Include="Assets\FXAA\Shaders\Fxaa3.shader" />
     <None Include="Assets\FXAA\Shaders\Fxaa3_9.cginc" />
     <Reference Include="UnityEditor.StandardEvents">
-      <HintPath>D:/__PROJECT__/_rico345100_NodeUnity샘플/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+      <HintPath>D:/__PROJECT__/_g_ws/ws_001/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>D:/__PROJECT__/_rico345100_NodeUnity샘플/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>D:/__PROJECT__/_g_ws/ws_001/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PackageManagerUI.Editor">
-      <HintPath>D:/__PROJECT__/_rico345100_NodeUnity샘플/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+      <HintPath>D:/__PROJECT__/_g_ws/ws_001/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>D:/__PROJECT__/_rico345100_NodeUnity샘플/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>D:/__PROJECT__/_g_ws/ws_001/unity-multiplayer-with-nodejs/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
