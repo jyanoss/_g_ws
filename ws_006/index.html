@@ -52,7 +52,8 @@
               <select id="select-room" class="form-control">
                 <option value="none" selected="selected">방을 선택해주세요</option>
                 <!-- 수동으로 만들어진 채팅 방 -->
-                <option value="test-room">테스트 방</option>
+                <option value="test-room1">테스트1 방</option>
+                <option value="test-room2">테스트2 방</option>
               </select>
               <div class="input-group-append">
                 <button id="select-room-button" class="btn btn-success" placeholder="message">Select</button>
@@ -82,12 +83,14 @@
         const socket = io();
         
         // 클라이언트에서 reuqest_message 프로토콜로 id='m' 의 input 값을 보낸다.
+        // 채팅 전송
         $('#msg-send').click(() => {
           socket.emit('request_message', $('#m').val());
           $('#m').val('');
           return false; 
         });
 
+        //방선택
         $('#select-room-button').click(() => {
           let roomName = $('#select-room').val();
           if(roomName === "none") 
@@ -95,12 +98,14 @@
           socket.emit('req_join_room', roomName)
         });
 
+        //방채팅 전송
         $('#room-msg-send').click(() => {
           socket.emit('req_room_message', $('#room-message').val());
           $('#room-message').val('');
           return false;
         });
 
+        //
         socket.on('response_message', (res) => {
           $('#messages').prepend($('<li>').text(res));
         });

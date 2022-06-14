@@ -1,8 +1,8 @@
 // app.js
 
-const app = require('express')();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const app   = require('express')();
+const http  = require('http').createServer(app);
+const io    = require('socket.io')(http);
 
 let rooms = [];
 
@@ -11,6 +11,7 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket)=>{
+
     socket.on('request_message', (msg) => {
         // response_message로 접속중인 모든 사용자에게 msg 를 담은 정보를 방출한다.
         io.emit('response_message', msg);
@@ -25,11 +26,16 @@ io.on('connection', (socket)=>{
             
         }
         socket.join(roomName);
-        io.to(roomName).emit('noti_join_room', "방에 입장하였습니다.");
+        io.to(roomName).emit('noti_join_room', roomName + " 방에 입장하였습니다.");
+        console.log(roomName);
+        console.log(rooms);
     });
 
     // 채팅방에 채팅 요청
     socket.on('req_room_message', async(msg) => {
+        
+        console.log(msg);
+        console.log(getUserCurrentRoom(socket));
         let userCurrentRoom = getUserCurrentRoom(socket);
         io.to(userCurrentRoom).emit('noti_room_message', msg);
     });
