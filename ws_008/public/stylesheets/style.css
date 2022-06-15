@@ -1,0 +1,27 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#top{ /*최상단 프로젝트 이름*/
+  width: 100%;
+}
+#chatLog{ /*채팅 기록*/
+  height: calc(100% - 76px);
+}
+#chat{ /*이름, 메시지, 전송버튼*/
+  display: flex;
+}
+#name{
+  width: 20%;
+}
+#message{
+  width: 60%;
+}
+#submit{
+  width: 20%;
+}

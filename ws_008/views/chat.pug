@@ -1,0 +1,72 @@
+// chat.pug
+
+doctype 5
+html
+    head
+        title= 'Chat'
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+
+        // socket.io와 jquery를 사용하기 위한 script src
+        script(src='/socket.io/socket.io.js')
+        script(src='//code.jquery.com/jquery-1.11.1.js')
+
+        // 부트스트랩을 사용하기 위한 link와 script
+        link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css", integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous")
+        script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js", integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous")  
+
+    body
+        // top
+        div 
+            button#top.btn.btn-warning(type='button') Chatting-App  
+        // textarea
+        div
+            textarea#chatLog.form-control(readonly='')  
+        // name, text, submit
+        div
+            form#chat
+                input#name.form-control(type='text')
+                input#message.form-control(type='text')
+                button#submit.btn.btn-warning(type='submit') Submit
+        
+        script.
+            var socket = io();
+
+            // 메시지 전송
+            $('#chat').on('submit', function(e){
+                // 'send message 이벤트 발생(name, message input 전달)
+                socket.emit('send message', $('#name').val(), $('#message').val());
+                // message input에 들어있는 값 초기화
+                $('#message').val('');
+                // 사용자가 링크를 클릭하거나 폼을 제출해도 계속 같은 페이지에 머무르게 함
+                e.preventDefault();
+            });
+
+            // 이름 생성
+            socket.on('create name', function(name){
+                // 전달받은 name input값으로 name 설정
+                $('#name').val(name);
+            });
+
+            // 이름 변경
+            socket.on('change name', function(oldname, name){
+                $('#chatLog').append('[알림] ' + oldname + '님이 ' + name + '으로 닉네임을 변경하였습니다.\n');
+            });
+
+            // 메세지 수신
+            socket.on('receive message', function(msg){
+                // 메세지 출력
+                $('#chatLog').append(msg+'\n');
+                // 채팅창 스크롤이 생길 시 제일 아래쪽으로 스크롤을 내려줌
+                $('#chatLog').scrollTop($('#chatLog')[0].scrollHeight);
+            });
+	  
+            // 채팅방 접속
+            socket.on('new connect', function(name){
+                $('#chatLog').append('[알림] ' + name + '님이 채팅창에 입장하였습니다.\n');
+            });
+
+            // 채팅방 종료
+            socket.on('new disconnect', function(name){
+                $('#chatLog').append('[알림] ' + name + '님이 채팅창을 떠났습니다.\n');
+            });
