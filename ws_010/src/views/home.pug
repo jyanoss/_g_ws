@@ -1,0 +1,54 @@
+//- home.pug
+
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Noom
+        //- 덜 못생기게 만들어주는 요소
+        link(rel="stylesheet", href="https://unpkg.com/mvp.css") 
+    body 
+        header
+            h1 Noom
+        main
+            div#login
+                h4 Login:
+                form
+                    input(placeholder="login id", required, type="text")
+                    button Login 
+                ul
+                // ID, 패스워드 입력해서 로그인...
+                // NickName
+                
+            div#lobby
+                h4 Lobby:
+                form
+                    input(placeholder="room name", required, type="text")
+                    button Enter Room 
+                ul
+                // 로비화면 방리스트 표시 및 입장, 방만들기, 로그인 화면으로
+
+            div#room 
+                h3
+                ul
+                form#name
+                    input(placeholder="nickname", required, type="text")
+                    button Save
+                form#msg
+                    input(placeholder="message", required, type="text")
+                    button Send
+                // 채팅룸입장 방이름, 참여자목록
+
+            div#welcome
+                h4 Open Rooms:
+                form
+                    input(placeholder="room name", required, type="text")
+                    button Enter Room 
+                ul
+
+        //- 프론트엔드에 웹소켓 설치
+        script(src="/socket.io/socket.io.js") 
+        script(src="/public/js/app.js")
+
