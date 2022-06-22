@@ -36,17 +36,6 @@ function handleNicknameSubmit(event){
 }
 
 
-function showRoom() { // 방에 들어가면 방 내용이 보이게
-    welcome.hidden = true;
-    room.hidden = false; 
-    const h3 = room.querySelector("h3");
-    h3.innerText = `Room ${roomName}` // 저장된 방 이름을 pug의 요소에 전달해서 띄움! 
-    const msgForm = room.querySelector("#msg");
-    const nameForm = room.querySelector("#name");
-    msgForm.addEventListener("submit", handleMessageSubmit);
-    nameForm.addEventListener("submit", handleNicknameSubmit);
-}
-
 function handleRoomSubmit(event){
     event.preventDefault();
     const input = form.querySelector("input");

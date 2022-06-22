@@ -51,17 +51,21 @@ function publicRooms(){
 }
 
 
-function countRoom(roomName){ // 방에 사람이 몇명이 있는지 계산하는 함수(set의 size를 이용)
-    return wsServer.sockets.adapter.rooms.get(roomName)?.size; // roomName을 찾을 수도 있지만 못찾을 수도 있기 때문에 ?를 붙여준다
+function countRoom(g_room_name){ // 방에 사람이 몇명이 있는지 계산하는 함수(set의 size를 이용)
+    return wsServer.sockets.adapter.rooms.get(g_room_name)?.size; // g_room_name을 찾을 수도 있지만 못찾을 수도 있기 때문에 ?를 붙여준다
 }
 
 
 // websocket에 비해 개선점 : 1. 어떤 이벤트든지 전달 가능 2. JS Object를 보낼 수 있음
 wsServer.on("connection", socket => {
     //socket["nickname"] = "Anonymous";
+
+
     socket.onAny((event) => { // 미들웨어같은 존재! 어느 이벤트에서든지 console.log를 할 수 있다!
         // console.log(wsServer.sockets.adapter); // 어댑터 동작 확인하기
         console.log(`Socket Event:${event}`)
+        console.log(wsServer.sockets.adapter.rooms);
+
     })
 
 
@@ -69,16 +73,27 @@ wsServer.on("connection", socket => {
     socket.on("a000_login", (login_id, done) => {
         // console.log(socket.rooms); // 현재 들어가있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
         socket["nickname"] = login_id;
-        console.log(socket);
-        done();
+        //console.log(socket.rooms);
+        done('0', login_id);  //로그인성공
     });
 
-    socket.on("enter_room", (roomName, done) => {
+    // >>>(B000) 방만들기 PROC
+    socket.on("B000_RoomCreate", (g_room_name, done) => {
         // console.log(socket.rooms); // 현재 들어가있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
-        socket.join(roomName);
+        socket.join(g_room_name);
         // console.log(socket.rooms);  // 앞은 id, 뒤는 현재 들어가있는 방
         done();
-        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName)); // welcome 이벤트를 roomName에 있는 모든 사람들에게 emit한 것 (하나의 socket에만 메시지 전달), 들어오면 사람수가 바뀌므로 사람수 count!
+        socket.to(g_room_name).emit("welcome", socket.nickname, countRoom(g_room_name)); // welcome 이벤트를 g_room_name에 있는 모든 사람들에게 emit한 것 (하나의 socket에만 메시지 전달), 들어오면 사람수가 바뀌므로 사람수 count!
+        wsServer.sockets.emit("room_change", publicRooms()); // room_change 이벤트의 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
+    });
+
+
+    socket.on("enter_room", (g_room_name, done) => {
+        // console.log(socket.rooms); // 현재 들어가있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
+        socket.join(g_room_name);
+        // console.log(socket.rooms);  // 앞은 id, 뒤는 현재 들어가있는 방
+        done();
+        socket.to(g_room_name).emit("welcome", socket.nickname, countRoom(g_room_name)); // welcome 이벤트를 g_room_name에 있는 모든 사람들에게 emit한 것 (하나의 socket에만 메시지 전달), 들어오면 사람수가 바뀌므로 사람수 count!
         wsServer.sockets.emit("room_change", publicRooms()); // room_change 이벤트의 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
     });
 

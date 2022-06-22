@@ -12,41 +12,39 @@ html(lang="en")
     body 
         header
             h1 Noom
+            div#login_id
+            div#room_name
         main
             div#login
-                h4 Login:
+                h4 로그인 화면입니다.
                 form
-                    input(placeholder="login id", required, type="text")
+                    input(placeholder="login id", required, type="text", value = "1")
                     button Login 
                 ul
                 // ID, 패스워드 입력해서 로그인...
                 // NickName
                 
             div#lobby
-                h4 Lobby:
+                h4 로비입니다.
                 form
                     input(placeholder="room name", required, type="text")
-                    button Enter Room 
+                    button Create 
                 ul
+                button#btn_logout logout
                 // 로비화면 방리스트 표시 및 입장, 방만들기, 로그인 화면으로
 
             div#room 
+                h3 회의실입니다.
                 h3
                 ul
-                form#name
-                    input(placeholder="nickname", required, type="text")
-                    button Save
+                //form#name
+                //    input(placeholder="nickname", required, type="text")
+                //    button Save
                 form#msg
                     input(placeholder="message", required, type="text")
                     button Send
                 // 채팅룸입장 방이름, 참여자목록
-
-            div#welcome
-                h4 Open Rooms:
-                form
-                    input(placeholder="room name", required, type="text")
-                    button Enter Room 
-                ul
+                button#btn_leave Leave
 
         //- 프론트엔드에 웹소켓 설치
         script(src="/socket.io/socket.io.js") 
