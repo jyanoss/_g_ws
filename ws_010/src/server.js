@@ -14,8 +14,8 @@ app.use("/public", express.static(__dirname + "/public")); // public 폴더를 �
 app.get("/", (req, res) => res.render("home")); // 홈페이지로 이동할 때 사용될 템플릿을 렌더
 app.get("/*", (req, res) => res.redirect("/")) // 홈페이지 내 어느 페이지에 접근해도 홈으로 연결되도록 리다이렉트 (다른 url 사용 안할거라)
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`)
-// app.listen(3000, handleListen); // 3000번 포트와 연결
+const hdlListen = () => console.log(`Listening on http://localhost:3000`)
+// app.listen(3000, hdlListen); // 3000번 포트와 연결
 
 const httpServer = http.createServer(app); // app은 requestlistener 경로 - express application으로부터 서버 생성
 const wsServer = new Server(httpServer, {
@@ -69,7 +69,7 @@ wsServer.on("connection", socket => {
     })
 
 
-    // >>>(A002) 로그인 PROC
+    
     socket.on("a000_login", (login_id, done) => {
         // console.log(socket.rooms); // 현재 들어가있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
         socket["nickname"] = login_id;
@@ -77,14 +77,20 @@ wsServer.on("connection", socket => {
         done('0', login_id);  //로그인성공
     });
 
+    socket.on("a999_logout", (done) => {
+        done('0', '로그아웃 성공'); 
+    });
+    
     // >>>(B000) 방만들기 PROC
     socket.on("B000_RoomCreate", (g_room_name, done) => {
         // console.log(socket.rooms); // 현재 들어가있는 방을 표시 (기본적으로 User와 Server 사이에 private room이 있다!)
         socket.join(g_room_name);
         // console.log(socket.rooms);  // 앞은 id, 뒤는 현재 들어가있는 방
-        done();
+        done('0',g_room_name);
+        //방에 입장한 사람들에게 메시지 전송
         socket.to(g_room_name).emit("welcome", socket.nickname, countRoom(g_room_name)); // welcome 이벤트를 g_room_name에 있는 모든 사람들에게 emit한 것 (하나의 socket에만 메시지 전달), 들어오면 사람수가 바뀌므로 사람수 count!
-        wsServer.sockets.emit("room_change", publicRooms()); // room_change 이벤트의 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
+
+        //--wsServer.sockets.emit("room_change", publicRooms()); // room_change 이벤트의 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
     });
 
 
@@ -94,15 +100,17 @@ wsServer.on("connection", socket => {
         // console.log(socket.rooms);  // 앞은 id, 뒤는 현재 들어가있는 방
         done();
         socket.to(g_room_name).emit("welcome", socket.nickname, countRoom(g_room_name)); // welcome 이벤트를 g_room_name에 있는 모든 사람들에게 emit한 것 (하나의 socket에만 메시지 전달), 들어오면 사람수가 바뀌므로 사람수 count!
-        wsServer.sockets.emit("room_change", publicRooms()); // room_change 이벤트의 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
+        //wsServer.sockets.emit("room_change", publicRooms()); // room_change 이벤트의 payload는 publicRooms 함수의 결과 (우리 서버 안에 있는 모든 방의 array = 서버의 모든 socket)
     });
 
     socket.on("disconnecting", () => { // 클라이언트가 서버와 연결이 끊어지기 직전에 마지막 굿바이 메시지를 보낼 수 있다!
-        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)); // 방안에 있는 모두에게 보내기 위해 forEach 사용!, 나가면 사람수가 바뀌므로 사람수 count!
+        //작업대기
+        //socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room) - 1)); // 방안에 있는 모두에게 보내기 위해 forEach 사용!, 나가면 사람수가 바뀌므로 사람수 count!
     })
 
     socket.on("disconnect", () => {
-        wsServer.sockets.emit("room_change", publicRooms()); // 클라이언트가 종료메시지를 모두에게 보내고 room이 변경되었다고 모두에게 알림!
+        //작업대기
+        //wsServer.sockets.emit("room_change", publicRooms()); // 클라이언트가 종료메시지를 모두에게 보내고 room이 변경되었다고 모두에게 알림!
     });
 
     socket.on("new_message", (msg, room, done) => { // 메세지랑 done 함수를 받을 것
@@ -115,5 +123,5 @@ wsServer.on("connection", socket => {
 
 
 
-httpServer.listen(3000, handleListen); // 서버는 ws, http 프로토콜 모두 이해할 수 있게 된다!
+httpServer.listen(4000, hdlListen); // 서버는 ws, http 프로토콜 모두 이해할 수 있게 된다!
 

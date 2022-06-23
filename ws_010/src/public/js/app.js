@@ -27,7 +27,7 @@ let g_room_name;
 
 
 // >>>(A001) 로그인 Submit
-function handleA000Login(event){
+function hdlA000Login(event){
     event.preventDefault();
     const input = login_form.querySelector("input");
     // argument 보내기 가능 (socketIO는 Object 전달가능)
@@ -55,7 +55,7 @@ function showLobby(ret_code, login_id) { // 방에 들어가면 방 내용이 �
         g_login_id                  = login_id;
         div_login_id.innerText      = `[${login_id}] 으로 로그인`;
         div_room_name.innerText     = "";
-        lobby_form.addEventListener("submit", handleB000Room);
+        lobby_form.addEventListener("submit", hdlB000Room);
 
     }else{
         alert('로그인 실패');
@@ -69,7 +69,8 @@ function showLobby(ret_code, login_id) { // 방에 들어가면 방 내용이 �
 }
 
 // >>>(A999) 로그아웃
-function handleA999logout() { 
+function hdlA999logout(event) { 
+    /*
     login.hidden            = false;
     lobby.hidden            = true;
     room.hidden             = true; 
@@ -78,10 +79,38 @@ function handleA999logout() {
     div_login_id.innerText  = "";
     div_room_name.innerText = "";
     alert('로그 아웃');
+    */
+    event.preventDefault();
+    socket.emit( // emit의 마지막 요소가 function이면 가능
+        "a999_logout",
+        LeaveLobby   // 백엔드에서 끝났다는 사실을 알리기 위해 function을 넣고 싶다면 맨 마지막에 넣자!
+    ); // 1. socketIO를 이용하면 모든 것이 메세지일 필요가 없다! / 2. client는 어떠한 이벤트든 모두 emit 가능 / 아무거나 전송할 수 있다(text가 아니어도 되고 여러개 전송 가능!)
+
 }
 
+// >>>(A00X) 로그인성공 
+function LeaveLobby(ret_code) { // 방에 들어가면 방 내용이 보이게
+
+    if(ret_code === '0'){
+
+        alert('로그아웃 성공');
+        login.hidden            = false;
+        lobby.hidden            = true;
+        room.hidden             = true; 
+        btn_logout.hidden       = true;
+        g_login_id              = "";
+        div_login_id.innerText  = "";
+        div_room_name.innerText = "";
+
+    }else{
+        alert('로그아웃 실패');
+        return false;
+    }
+}
+
+
 // >>>(B000) 방생성
-function handleB000Room(event){
+function hdlB000Room(event){
     event.preventDefault();
     const input = lobby_form.querySelector("input");
     // argument 보내기 가능 (socketIO는 Object 전달가능)
@@ -95,16 +124,23 @@ function handleB000Room(event){
     input.value = "";
 }
 
-function showRoom2() { // 방에 들어가면 방 내용이 보이게
-    login.hidden    = true;
-    lobby.hidden    = true;
-    room.hidden     = false; 
+function showRoom2(ret_code, msg) { // 방에 들어가면 방 내용이 보이게
 
-    //const h3 = room.querySelector("h3");
-    div_room_name.innerText = `Room ${g_room_name}` // 저장된 방 이름을 pug의 요소에 전달해서 띄움! 
-    const msgForm = room.querySelector("#msg");
-    msgForm.addEventListener("submit", handleMessageSubmit);
-    btn_leave.addEventListener("click", handleMessageSubmit);
+    if(ret_code === '0'){
+        login.hidden    = true;
+        lobby.hidden    = true;
+        room.hidden     = false; 
+        alert(msg);
+        //const h3 = room.querySelector("h3");
+        div_room_name.innerText = `Room ${g_room_name}`                 // 상단에 방이름표시
+
+        const msgForm = room.querySelector("#msg");
+        msgForm.addEventListener("submit", hdlMessageSubmit);
+        btn_leave.addEventListener("click", hdlMessageSubmit);
+    } else {
+        alert('Create Failed!');
+        return;
+    }
 }
 
 function addMessage(message){
@@ -114,7 +150,7 @@ function addMessage(message){
     ul.appendChild(li);
 }
 
-function handleMessageSubmit(event){
+function hdlMessageSubmit(event){
     event.preventDefault();
     const input = room.querySelector("#msg input");
     const value = input.value;
@@ -124,24 +160,23 @@ function handleMessageSubmit(event){
     input.value = "";
 }
 
-function handleNicknameSubmit(event){
+function hdlNicknameSubmit(event){
     event.preventDefault();
     const input = room.querySelector("#name input");
     socket.emit("nickname", input.value);
 }
 
-
-
 // 서버는 back-end에서 function을 호출하지만 function은 front-end에서 실행됨!!
 
 
 // >>>(A000) 로그인
-login_form.addEventListener("submit", handleA000Login);     //로그인이벤트등록
-btn_logout.addEventListener("click", handleA999logout);     //로그아웃이벤트등록
+login_form.addEventListener("submit", hdlA000Login);     //로그인이벤트등록
+btn_logout.addEventListener("click", hdlA999logout);     //로그아웃이벤트등록
 
 
 // >>>(B001) 로비-룸목록
 socket.on("room_list", (rooms) => {
+    console.log("room_list");
     rooms.forEach(roomList => { // rooms 데이터로 받아온 자료들을 li에 하나씩 뿌려준 후 roomsList에 넣어서 출력시킨다
         console.log(roomList)
         //console.log(socket.roomList); 
@@ -149,12 +184,14 @@ socket.on("room_list", (rooms) => {
 }); 
 
 socket.on("welcome", (user, newCount) => {
+    console.log("welcome");
     const h3 = room.querySelector("h3"); // 지금은 showRoom 함수에서 copy&paste 했지만, title을 새로고침해주는 함수를 만들어줘도 좋다!
     h3.innerText = `Room ${g_room_name} (${newCount})` // 저장된 방 이름을 pug의 요소에 전달해서 띄움! 
-    addMessage(`${user} arrived!`);
+    addMessage(`welcome ${user} arrived!`);
 })
 
 socket.on("bye", (left, newCount) => {
+    console.log("bye");
     const h3 = room.querySelector("h3");
     h3.innerText = `Room ${g_room_name} (${newCount})` // 저장된 방 이름을 pug의 요소에 전달해서 띄움! 
     addMessage(`${left} left ㅠㅠ`);
@@ -163,6 +200,7 @@ socket.on("bye", (left, newCount) => {
 socket.on("new_message", addMessage); // addMessage만 써도 알아서 msg를 매개변수로 넣는다!
 
 socket.on("room_change", (rooms) => {
+    console.log("room_change",rooms);
     const roomList = room.querySelector("ul"); // home.pug에 만든 ul을 가져와서
     roomList.innerHTML = ""; // roomList의 HTML을 초기화
     
