@@ -15,32 +15,47 @@ html(lang="en")
             div#login_id
             div#room_name
         main
-            div#login
-                h4 로그인 화면입니다.
+            div#login   
+                h2 LOGIN ***********************
+                //login_form 사용
                 form
                     input(placeholder="login id", required, type="text", value = "1")
-                    button Login 
+                    button#btn_login Login 
                 ul
                 // ID, 패스워드 입력해서 로그인...
                 // NickName
                 
             div#lobby
-                h4 로비입니다.
+                h2 LOBBY ***********************
+                //룸리스트
+                div
+                    h5 RoomList__________________
+                    ul#RoomList
+                
+                //로비채팅글
+                div
+                    h5 lobbybox__________________
+                    ul#lobbybox
                 form
-                    input(placeholder="room name", required, type="text")
-                    button#btn_create Create 
-                ul
-                button#btn_logout logout
+                    input(placeholder="로비 채팅글을 입력하세요...", required, type="text")
+                    button#btn_LobbySend Send 
+                //방만들기버튼
+                button#btn_create btn_create
+                _
+                //로그아웃버튼
+                button#btn_logout btn_logout
                 // 로비화면 방리스트 표시 및 입장, 방만들기, 로그인 화면으로
 
             div#room 
-                h3 회의실입니다.
-                ul#chatbox
+                h2 ROOM ***********************
+                div
+                    h5 chatbox__________________
+                    ul#chatbox
                 //form#name
                 //    input(placeholder="nickname", required, type="text")
                 //    button Save
                 form#msg
-                    input(placeholder="message", required, type="text")
+                    input(placeholder="게임룸 채팅글을 입력하세요...", required, type="text")
                     button Send
                 // 채팅룸입장 방이름, 참여자목록
                 button#btn_leave Leave

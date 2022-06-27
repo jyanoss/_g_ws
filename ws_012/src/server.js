@@ -30,8 +30,8 @@ instrument(wsServer, {
 });
 
 /////////////////////////////////////////////////////////////////////////////////
-let g_room_id      = 100000;             //방이름관리
-
+let g_lobby_id      = 100000;            //로비 방번호
+let g_room_id_last  = 100000;             //마지막 방번호
 
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -56,8 +56,8 @@ function publicRooms(){
 }
 
 //해당방의 사람수리턴
-function countRoom(g_room_name){ // 방에 사람이 몇명이 있는지 계산하는 함수(set의 size를 이용)
-    return wsServer.sockets.adapter.rooms.get(g_room_name)?.size; // g_room_name을 찾을 수도 있지만 못찾을 수도 있기 때문에 ?를 붙여준다
+function countRoom(g_room_id){ // 방에 사람이 몇명이 있는지 계산하는 함수(set의 size를 이용)
+    return wsServer.sockets.adapter.rooms.get(g_room_id)?.size; // g_room_id 찾을 수도 있지만 못찾을 수도 있기 때문에 ?를 붙여준다
 }
 
 
@@ -68,7 +68,7 @@ wsServer.on("connection", socket => {
     socket.onAny((event) => { // 미들웨어같은 존재! 어느 이벤트에서든지 console.log를 할 수 있다!
         // console.log(wsServer.sockets.adapter); // 어댑터 동작 확인하기
         console.log(`Socket Event:${event}`)
-        console.log(publicRooms());
+        console.log(wsServer.sockets.adapter.rooms)
     })
 
     //로그인요청
@@ -76,24 +76,43 @@ wsServer.on("connection", socket => {
         // 1.로그인처리 (ToDo)
         // 2.소켓닉네임등록
         socket["nickname"] = login_id;
-        // 3.결과리턴
-        socket.emit('a000_login_result', '0', login_id);       //event, ret_code (0:성공), 로그인아이디
+        // 3.로비방입장
+        socket.join(g_lobby_id);
+        console.log(publicRooms());
+        // 4.결과리턴
+        socket.emit('a000_login_result', '0', login_id, g_lobby_id);       //event, ret_code (0:성공), 로그인아이디
   
     });
 
     //로그아웃요청
     socket.on("a999_logout", () => {
         // 1.로그아웃처리 (ToDo)
-        // 2.결과리턴
+        // 2.로비방퇴장
+        socket.leave(g_lobby_id);
+        console.log(publicRooms());
+        // 3.결과리턴
         socket.emit('a999_logout_result', '0', '로그아웃성공');  //event, ret_code (0:성공), 결과메시지
     });
-    
-    //방생성요청
-    socket.on("b000_roomCreate", (room_name) => {
-        // 1.방생성처리 (ToDo)
-        // 2.방조인처리
-        socket.join(room_name);
+
+    //로비메시지전송요청
+    socket.on("b000_msgSend", ( msg, room_name, login_id ) => { // 메세지랑 done 함수를 받을 것
+        console.log('b000_msgSend_return', login_id, room_name, msg)
         console.log('room: ', wsServer.sockets.adapter.rooms);
+        // 1.메시지 저장
+        // 2.메시지전송
+        socket.to(room_name).emit('b000_msgSend_return', '0', `${login_id}: ${msg}`);
+  
+        //console.log(socket);
+    });
+
+    //방생성요청
+    socket.on("b000_roomCreate", () => {
+        // 1.방생성처리 (ToDo)
+        var room_name = g_room_id_last++ ;
+        // 2.방조인처리
+        socket.leave(g_lobby_id);
+        socket.join(room_name);
+        console.log(publicRooms());
         // 3.결과리턴
         socket.emit('b000_roomCreate_reuslt', '0', room_name);  //event, ret_code (0:성공), 결과메시지
     });
@@ -103,13 +122,15 @@ wsServer.on("connection", socket => {
         // 1.방나가기처리 DB (ToDo)
         // 2.방나기기처리
         socket.leave(room_name);
-        // 3.결과리턴
-        socket.emit('b999_roomLeave_result', '0', '방나가기성공');  //event, ret_code (0:성공), 결과메시지
+        socket.join(g_lobby_id);
+        console.log(publicRooms());
+       // 3.결과리턴
+        socket.emit('b999_roomLeave_result', '0', '방나가기성공',g_lobby_id);  //event, ret_code (0:성공), 결과메시지
         // 4.방메시지전송
 
     });
     
-    //메시지전송요청
+    //룸메시지전송요청
     socket.on("c000_msgSend", ( msg, room_name, login_id ) => { // 메세지랑 done 함수를 받을 것
         console.log('c000_msgSend_return', login_id, room_name, msg)
         console.log('room: ', wsServer.sockets.adapter.rooms);
