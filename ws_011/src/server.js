@@ -29,7 +29,33 @@ instrument(wsServer, {
     auth: false, // 실제 비밀번호를 쓰도록 바꿀 수 있음!
 });
 
+/////////////////////////////////////////////////////////////////////////////////
+let g_room_id      = 100000;             //방이름관리
 
+
+
+/////////////////////////////////////////////////////////////////////////////////
+// 방목록 만들기
+function publicRooms(){
+    const {
+        sockets: {
+            adapter: {
+                sids, rooms
+            }
+        }
+    } = wsServer; // wsServer에서 sids와 rooms 가져오기
+
+    // public room list 만들기
+    const publicRooms = [];
+    rooms.forEach((_, key) => {
+        if(sids.get(key) === undefined){
+            publicRooms.push(key);
+        }
+    })
+    return publicRooms;
+}
+
+//해당방의 사람수리턴
 function countRoom(g_room_name){ // 방에 사람이 몇명이 있는지 계산하는 함수(set의 size를 이용)
     return wsServer.sockets.adapter.rooms.get(g_room_name)?.size; // g_room_name을 찾을 수도 있지만 못찾을 수도 있기 때문에 ?를 붙여준다
 }
@@ -42,7 +68,7 @@ wsServer.on("connection", socket => {
     socket.onAny((event) => { // 미들웨어같은 존재! 어느 이벤트에서든지 console.log를 할 수 있다!
         // console.log(wsServer.sockets.adapter); // 어댑터 동작 확인하기
         console.log(`Socket Event:${event}`)
-        console.log(wsServer.sockets.adapter.rooms);
+        console.log(publicRooms());
     })
 
     //로그인요청
@@ -52,6 +78,7 @@ wsServer.on("connection", socket => {
         socket["nickname"] = login_id;
         // 3.결과리턴
         socket.emit('a000_login_result', '0', login_id);       //event, ret_code (0:성공), 로그인아이디
+  
     });
 
     //로그아웃요청
@@ -85,10 +112,12 @@ wsServer.on("connection", socket => {
     //메시지전송요청
     socket.on("c000_msgSend", ( msg, room_name, login_id ) => { // 메세지랑 done 함수를 받을 것
         console.log('c000_msgSend_return', login_id, room_name, msg)
-        //메시지전송
-        socket.to(room_name).emit('c000_msgSend_return', '0', `${login_id}: ${msg}`);
         console.log('room: ', wsServer.sockets.adapter.rooms);
-        console.log(socket);
+        // 1.메시지 저장
+        // 2.메시지전송
+        socket.to(room_name).emit('c000_msgSend_return', '0', `${login_id}: ${msg}`);
+  
+        //console.log(socket);
     });
     
     

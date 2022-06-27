@@ -143,7 +143,6 @@ function hdl_b999_roomLeave(event){
     event.preventDefault();
     var room_name = g_room_name;
     socket.emit( "b999_roomLeave", room_name);   
-  
 }
 
 // 방나가기 결과처리
@@ -183,6 +182,7 @@ function hdl_c000_msgSend(event){
     var login_id    = g_login_id;
     const input     = room_form.querySelector("input");
     socket.emit("c000_msgSend", input.value, room_name, login_id);   
+    addMessage(`${login_id}(me): ${input.value}`);
     input.value     = ""; 
 }
 
@@ -216,7 +216,7 @@ socket.on("a000_login_result", (ret_code, login_id) => {
     hdl_a000_login_result(ret_code, login_id);    
 })
 
-//로그인아웃처리
+//로그아웃처리
 socket.on("a999_logout_result", (ret_code, msg) => {  
     console.log("a999_logout_result", ret_code, msg);
     hdl_a999_logout_result(ret_code, msg);    
