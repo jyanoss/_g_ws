@@ -81,7 +81,8 @@ wsServer.on("connection", socket => {
         console.log(publicRooms());
         // 4.결과리턴
         socket.emit('a000_login_result', '0', login_id, g_lobby_id);       //event, ret_code (0:성공), 로그인아이디
-  
+        // 9. 방리스트전달
+        socket.emit('b100_RoomList_return', '0', publicRooms());           
     });
 
     //로그아웃요청
@@ -105,32 +106,49 @@ wsServer.on("connection", socket => {
         //console.log(socket);
     });
 
+    //방조인요청
+    socket.on("b200_joinRoom", (room_name) => {
+        // 1.방처리
+        // 2.방아웃처리
+        socket.leave(g_lobby_id);
+        // 3.방조인처리
+        socket.join(room_name);
+        // 4.결과리턴
+        socket.emit('b200_joinRoom_result', '0', room_name);  //event, ret_code (0:성공), 결과메시지
+    });
+
+    
     //방생성요청
     socket.on("b000_roomCreate", () => {
         // 1.방생성처리 (ToDo)
-        var room_name = g_room_id_last++ ;
-        // 2.방조인처리
+        var room_name = ++g_room_id_last;
+        // 2.방아웃처리
         socket.leave(g_lobby_id);
+        // 3.방조인처리
         socket.join(room_name);
         console.log(publicRooms());
-        // 3.결과리턴
+        // 4.결과리턴
         socket.emit('b000_roomCreate_reuslt', '0', room_name);  //event, ret_code (0:성공), 결과메시지
     });
 
     //방나가기요청
     socket.on("b999_roomLeave", (room_name) => {
         // 1.방나가기처리 DB (ToDo)
-        // 2.방나기기처리
+        // 2.방아웃처리
         socket.leave(room_name);
+        // 3.방조인처리
         socket.join(g_lobby_id);
         console.log(publicRooms());
-       // 3.결과리턴
+        // 4.결과리턴
         socket.emit('b999_roomLeave_result', '0', '방나가기성공',g_lobby_id);  //event, ret_code (0:성공), 결과메시지
-        // 4.방메시지전송
+        // 5.방메시지전송
+
+        // 9. 방리스트전달
+        socket.emit('b100_RoomList_return', '0', publicRooms());           
 
     });
     
-    //룸메시지전송요청
+    //방메시지전송요청
     socket.on("c000_msgSend", ( msg, room_name, login_id ) => { // 메세지랑 done 함수를 받을 것
         console.log('c000_msgSend_return', login_id, room_name, msg)
         console.log('room: ', wsServer.sockets.adapter.rooms);

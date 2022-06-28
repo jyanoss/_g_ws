@@ -27,6 +27,7 @@ let g_login_id;         //
 let g_room_id;        //
 
 
+
 //================================================================================================
 // 함수정의
 //================================================================================================
@@ -54,7 +55,7 @@ function hdl_a000_login_result(ret_code, login_id, room_name){
         // 로그인아이디 저장 // 로그인텍스트 출력
         g_login_id              = login_id;
         div_login_id.innerText  = `[${login_id}] 으로 로그인 성공`;
-        // 방이름 저장      // 방이름텍스트 삭제
+        // 방이름 저장      // 방이름텍스트 저장
         g_room_id               = room_name
         div_room_name.innerText = room_name;
 
@@ -114,6 +115,16 @@ function hdl_a999_logout_result(ret_code, msg){
         g_room_id               = ""
         div_room_name.innerText = "";
 
+        //로비채팅창초기화처리
+        const ul = document.getElementById("lobbybox");;
+        while (ul.firstChild) {
+            ul.removeChild(ul.firstChild);
+        }
+        const ul2 = document.getElementById("RoomList");;
+        while (ul2.firstChild) {
+            ul2.removeChild(ul2.firstChild);
+        }
+
     }else{
         alert(msg);
         return false;
@@ -140,6 +151,54 @@ function addLobbyMessage(message){
     ul.appendChild(li);
 }
 
+// 로비룸리스트 결과처리
+function addRoomList(message){
+    
+    const ul = document.getElementById("RoomList");;
+    message.forEach((key) => {
+        if(key !== 100000){
+            const li = document.createElement("li");
+            li.innerHTML = `<a href='#' onclick='hdl_b200_joinRoom(${key});'>${key}</a>`
+            ul.appendChild(li);
+        }
+    })
+    
+}
+
+//방조인 버튼 클릭
+function hdl_b200_joinRoom(room_name){
+    socket.emit( "b200_joinRoom", room_name);     
+}
+
+// 방조인결과처리
+function hdl_b200_joinRoom_result(ret_code, room_name){
+console.log(room_name);
+        //회의실페이지 이동
+        login.hidden    = true;
+        lobby.hidden    = true;
+        room.hidden     = false; 
+
+        //방이름 저장
+        g_room_id             = room_name
+        //방이름텍스트 저장
+        div_room_name.innerText = `Room ${room_name}`               
+
+        const msgForm = room.querySelector("#msg");
+        msgForm.addEventListener("submit", hdl_c000_msgSend);       // 메시지전송 버튼 이벤트 등록
+        btn_leave.addEventListener("click", hdl_b999_roomLeave);    // 방나가기 버튼 이벤트 등록
+
+        //로비채팅창초기화처리
+        const ul = document.getElementById("lobbybox");;
+        while (ul.firstChild) {
+            ul.removeChild(ul.firstChild);
+        }
+        const ul2 = document.getElementById("RoomList");;
+        while (ul2.firstChild) {
+            ul2.removeChild(ul2.firstChild);
+        }
+
+}
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 작업중
 
 // 방생성 버튼 클릭
@@ -160,12 +219,22 @@ function hdl_b000_roomCreate_result(ret_code, room_name){
         //const h3 = room.querySelector("h3");
         //방이름 저장
         g_room_id             = room_name
-        //방이름 출력
+        //방이름텍스트 저장
         div_room_name.innerText = `Room ${room_name}`               
 
         const msgForm = room.querySelector("#msg");
-        btn_leave.addEventListener("click", hdl_b999_roomLeave);    // 방나가기 버튼 이벤트 등록
         msgForm.addEventListener("submit", hdl_c000_msgSend);       // 메시지전송 버튼 이벤트 등록
+        btn_leave.addEventListener("click", hdl_b999_roomLeave);    // 방나가기 버튼 이벤트 등록
+
+        //로비채팅창초기화처리
+        const ul = document.getElementById("lobbybox");;
+        while (ul.firstChild) {
+            ul.removeChild(ul.firstChild);
+        }
+        const ul2 = document.getElementById("RoomList");;
+        while (ul2.firstChild) {
+            ul2.removeChild(ul2.firstChild);
+        }
 
     }else{
         //alert(room_name);
@@ -193,11 +262,11 @@ function hdl_b999_roomLeave_result(ret_code, msg, room_name){
         room.hidden             = true; 
         btn_logout.hidden       = false;
 
-        //방이름 삭제
-        g_room_id               = "";
-        //방이름 출력삭제
-        div_room_name.innerText = "";
-        //채팅창초기화처리
+        //방이름 저장
+        g_room_id               = room_name;
+        //방이름텍스트 저장
+        div_room_name.innerText = room_name;
+        //룸채팅창초기화처리
         const ul = room.querySelector("ul");
         while (ul.firstChild) {
             ul.removeChild(ul.firstChild);
@@ -210,7 +279,7 @@ function hdl_b999_roomLeave_result(ret_code, msg, room_name){
 
 }
 
-// 메시지 버튼 클릭
+// 방메시지 버튼 클릭
 function hdl_c000_msgSend(event){
     event.preventDefault();
     
@@ -259,6 +328,13 @@ socket.on("a999_logout_result", (ret_code, msg) => {
     hdl_a999_logout_result(ret_code, msg);    
 })
 
+//방조인처리
+socket.on("b200_joinRoom_result", (ret_code, room_name) => {  
+    console.log("b200_joinRoom_result", ret_code, room_name);
+    hdl_b200_joinRoom_result(ret_code, room_name);    
+})
+
+
 //방생성처리
 socket.on("b000_roomCreate_reuslt", (ret_code, room_name) => {  
     console.log("b000_roomCreate_reuslt", ret_code, room_name);
@@ -272,19 +348,24 @@ socket.on("b999_roomLeave_result", (ret_code, msg, room_name) => {
  
 })
 
-//메세지처리
+//로비메세지처리
 socket.on("b000_msgSend_return", (ret_code, msg) => { 
     console.log(">>>>>>>>>>> b000_msgSend_return", ret_code, msg);
     addLobbyMessage(msg);
 })
 
 
-//메세지처리
+//방메세지처리
 socket.on("c000_msgSend_return", (ret_code, msg) => { 
     console.log(">>>>>>>>>>> c000_msgSend_return", ret_code, msg);
     addRoomMessage(msg);
 })
 
+//로비룸리스트처리
+socket.on("b100_RoomList_return", (ret_code, msg) => { 
+    console.log(">>>>>>>>>>> b100_RoomList_return", ret_code, msg);
+    addRoomList(msg);
+})
 
 
 
