@@ -29,21 +29,28 @@ html(lang="en")
                 h2 LOBBY ***********************
                 //룸리스트
                 div
-                    h5 RoomList__________________
+                    h5 방목록__________________
                     ul#RoomList
                 
                 //로비채팅글
                 div
-                    h5 lobbybox__________________
+                    h5 로비채팅__________________
                     ul#lobbybox
                 form
+                    h5 채팅메뉴
                     input(placeholder="로비 채팅글을 입력하세요...", required, type="text")
                     button#btn_LobbySend Send 
+
+                form
+                    h5 방참가메뉴
+                    input(placeholder="방번호를 입력하세요...", required, type="text")
+                    button#btn_Join 방참가 
+
                 //방만들기버튼
-                button#btn_create btn_create
-                _
+                button#btn_create 방만들기
+                p
                 //로그아웃버튼
-                button#btn_logout btn_logout
+                button#btn_logout 로그아웃
                 // 로비화면 방리스트 표시 및 입장, 방만들기, 로그인 화면으로
 
             div#room 
